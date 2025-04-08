@@ -1,86 +1,59 @@
 #include <stdio.h>
 
 void main() {
-    int i, n, time_quantum;
-    float avg_wt = 0.0, avg_tat = 0.0;
-    int total_wt = 0, total_tat = 0;
-    printf("Enter the number of processes: ");
+    int i, n, time = 0, remain, ts, flag = 0;
+    int at[10], bt[10], rt[10];
+    int sum_wait = 0, sum_turnaround = 0;
+
+    printf("Enter number of processes: ");
     scanf("%d", &n);
+    remain = n;
 
-    int waiting_time[n], tatime[n];
-    int burst_time[n], remaining_burst_time[n];
-    int arrival_time[n], turnaround_time[n];
-
-    // Input burst time and arrival time for each process
-    for (i = 0; i < n; i++) {
-        printf("Enter the burst time for P%d: ", (i + 1));
-        scanf("%d", &burst_time[i]);
-        remaining_burst_time[i] = burst_time[i];
-        arrival_time[i] = 0; // assuming all processes arrive at time 0 for simplicity
+    for(i = 0; i < n; i++) {
+        printf("Enter arrival time and burst time for Process P%d: ", i + 1);
+        scanf("%d%d", &at[i], &bt[i]);
+        rt[i] = bt[i];
     }
 
-    // Input time quantum
-    printf("Enter the time quantum: ");
-    scanf("%d", &time_quantum);
+    printf("Enter Time Slice: ");
+    scanf("%d", &ts);
 
-    int current_time = 0;
-    int remaining_processes = n;
-    
-    // Round Robin Scheduling
-    while (remaining_processes > 0) {
-        for (i = 0; i < n; i++) {
-            if (remaining_burst_time[i] > 0) {
-                // Execute process for time quantum or the remaining burst time, whichever is smaller
-                int executed_time = (remaining_burst_time[i] < time_quantum) ? remaining_burst_time[i] : time_quantum;
-                remaining_burst_time[i] -= executed_time;
-                current_time += executed_time;
-
-                // If the process has finished, calculate its turnaround and waiting times
-                if (remaining_burst_time[i] == 0) {
-                    turnaround_time[i] = current_time - arrival_time[i];
-                    waiting_time[i] = turnaround_time[i] - burst_time[i];
-                    total_wt += waiting_time[i];
-                    total_tat += turnaround_time[i];
-                    remaining_processes--;
-                }
-            }
-        }
-    }
-
-    // Calculate averages
-    avg_wt = (float) total_wt / n;
-    avg_tat = (float) total_tat / n;
-
-    // Display in table format
-    printf("\nProcess\tBurst Time\tWaiting Time\tTurnaround Time\n");
-    for (i = 0; i < n; i++) {
-        printf("P%d\t\t%d\t\t%d\t\t%d\n", (i + 1), burst_time[i], waiting_time[i], turnaround_time[i]);
-    }
-
-    printf("\nThe average waiting time is %.2f\n", avg_wt);
-    printf("The average turnaround time is %.2f\n", avg_tat);
-
-    // Print Gantt Chart
     printf("\nGantt Chart:\n");
-    for (i = 0; i < n; i++) {
-        printf("-------");
-    }
-    printf("\n");
-    for (i = 0; i < n; i++) {
-        printf("| P%d  ", (i + 1));
-    }
-    printf("|\n");
-    for (i = 0; i < n; i++) {
-        printf("-------");
-    }
-    printf("\n");
+    printf("|");
 
-    current_time = 0;
-    printf("0");
-    for (i = 0; i < n; i++) {
-        current_time += burst_time[i];
-        printf("     %d", current_time);
+    for(time = 0, i = 0; remain != 0;) {
+        if(rt[i] <= ts && rt[i] > 0) {
+            time += rt[i];
+            printf(" P%d |", i + 1);  // Gantt Chart block
+            rt[i] = 0;
+            flag = 1;
+        } else if(rt[i] > 0) {
+            rt[i] -= ts;
+            time += ts;
+            printf(" P%d |", i + 1);  // Gantt Chart block
+        }
+
+        if(rt[i] == 0 && flag == 1) {
+            remain--;
+            int wait = time - at[i] - bt[i];
+            int tat = time - at[i];
+            sum_wait += wait;
+            sum_turnaround += tat;
+            flag = 0;
+        }
+
+        if(i == n - 1)
+            i = 0;
+        else if(at[i + 1] <= time)
+            i++;
+        else
+            i = 0;
     }
-    printf("\n");
+
+    printf("\n\nTotal Waiting Time: %d", sum_wait);
+    printf("\nAverage Waiting Time: %.2f", (float)sum_wait / n);
+    printf("\nTotal Turnaround Time: %d", sum_turnaround);
+    printf("\nAverage Turnaround Time: %.2f\n", (float)sum_turnaround / n);
 }
+
 

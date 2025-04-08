@@ -1,8 +1,9 @@
-#include <stdio.h>
+
+    #include <stdio.h>
 
 void main() {
     int i, n, time = 0, remain, ts, flag = 0;
-    int at[10], bt[10], rt[10];
+    int at[10], bt[10], rt[10],wt[10],tat[10];
     int sum_wait = 0, sum_turnaround = 0;
 
     printf("Enter number of processes: ");
@@ -35,10 +36,10 @@ void main() {
 
         if(rt[i] == 0 && flag == 1) {
             remain--;
-            int wait = time - at[i] - bt[i];
-            int tat = time - at[i];
-            sum_wait += wait;
-            sum_turnaround += tat;
+             wt[i] = time - at[i] - bt[i];
+            tat[i] = time - at[i];
+            sum_wait += wt[i];
+            sum_turnaround += tat[i];
             flag = 0;
         }
 
@@ -53,7 +54,14 @@ void main() {
     printf("\n\nTotal Waiting Time: %d", sum_wait);
     printf("\nAverage Waiting Time: %.2f", (float)sum_wait / n);
     printf("\nTotal Turnaround Time: %d", sum_turnaround);
-    printf("\nAverage Turnaround Time: %.2f\n", (float)sum_turnaround / n);
+    printf("\nAverage Turnaround Time: %.2f\n",(float)sum_turnaround / n);
+    
+    // Display the table
+    printf("\n\nProcess\tAT\tBT\tTAT\tWT\n");
+    for(i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t%d\n", i + 1, at[i], bt[i], tat[i], wt[i]);
+    }
 }
+
 
 
